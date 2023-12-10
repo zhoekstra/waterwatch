@@ -1,0 +1,4 @@
+locations:
+  - location_name: waterwatch
+    code_source:
+      module_name: water_watch
