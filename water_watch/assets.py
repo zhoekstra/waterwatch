@@ -18,7 +18,7 @@ HourlyStatePartititonDefenition = MultiPartitionsDefinition({
 
 WeeklyStatePartititonDefenition = MultiPartitionsDefinition({
     "state": StaticPartitionsDefinition(["co"]),
-    "date": WeeklyPartitionsDefinition(start_date="2023-12-10-07:00"),
+    "date": WeeklyPartitionsDefinition(start_date="2023-12-01-00:00"),
 })
 
 
