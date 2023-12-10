@@ -41,7 +41,6 @@ class SiteFlowAverageInformation(DataClassJsonMixin):
     dec_lat_va: float
     dec_long_va: float
     huc_cd: str
-    tz_cd: str
     flow: Union[str, float]
     flow_dt: Optional[str]
     flow_unit: str

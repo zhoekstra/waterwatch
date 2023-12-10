@@ -4,8 +4,7 @@ import dateutil.parser
 import pandas
 import requests
 from dagster import asset, MultiPartitionsDefinition, StaticPartitionsDefinition, HourlyPartitionsDefinition, \
-    AssetExecutionContext, build_asset_context, MultiPartitionKey, WeeklyPartitionsDefinition, AssetIn, \
-    LastPartitionMapping, MultiToSingleDimensionPartitionMapping
+    AssetExecutionContext, WeeklyPartitionsDefinition, AssetIn, MultiToSingleDimensionPartitionMapping
 
 from water_watch.stateflow_schema import SiteFlowInformation, SiteFlowFile, NULL_DATETIME_STRING, \
     SiteFlowAverageInformation, SiteFlowAverageFile
@@ -117,8 +116,7 @@ def site_flow_7d_information(context: AssetExecutionContext,
 def sites(site_flow_7d_information: pandas.DataFrame, site_flow_information: pandas.DataFrame) -> pandas.DataFrame:
     columns_to_retain = ['site_no', 'station_nm',
                          'dec_lat_va', 'dec_long_va',
-                         'huc_cd', 'tz_cd',
-                         'class_']
+                         'huc_cd', 'class_']
     reduced_7d = site_flow_7d_information[columns_to_retain]
     reduced_flow = site_flow_information[columns_to_retain]
     return pandas.concat([reduced_7d, reduced_flow], ignore_index=True).drop_duplicates()
