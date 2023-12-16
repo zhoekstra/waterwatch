@@ -30,7 +30,9 @@ def current_flow_data_raw(context: AssetExecutionContext) -> str:
     return r.text
 
 
-@asset(partitions_def=HourlyStatePartititonDefenition)
+@asset(
+    io_manager_key=gcs_io_manager_key,
+    partitions_def=HourlyStatePartititonDefenition)
 def current_flow_data_parsed(current_flow_data_raw: str) -> list[SiteFlowInformation]:
     return SiteFlowFile.from_json(current_flow_data_raw).sites
 
@@ -72,7 +74,9 @@ def flow_data_7d_raw(context: AssetExecutionContext) -> str:
     return r.text
 
 
-@asset(partitions_def=WeeklyStatePartititonDefenition)
+@asset(
+    io_manager_key=gcs_io_manager_key,
+    partitions_def=WeeklyStatePartititonDefenition)
 def flow_data_7d_parsed(flow_data_7d_raw: str) -> list[SiteFlowAverageInformation]:
     return SiteFlowAverageFile.from_json(flow_data_7d_raw).sites
 
