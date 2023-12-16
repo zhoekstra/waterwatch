@@ -12,10 +12,7 @@ from .io_managers import gcs_io_manager_key, bq_io_manager_key, gcs_io_manager, 
 from dagster_gcp.gcs import gcs_pickle_io_manager, gcs_resource
 
 
-AUTH_FILE = "/tmp/gcp_creds.json"
-with open(AUTH_FILE, "w") as f:
-    json.dump(json.loads(base64.b64decode(os.getenv("GCP_CREDS_JSON_CREDS_BASE64"))), f)
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = AUTH_FILE
+#
 
 all_assets = load_assets_from_modules(
     modules=[assets],

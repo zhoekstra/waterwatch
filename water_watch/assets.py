@@ -4,7 +4,8 @@ import dateutil.parser
 import pandas
 import requests
 from dagster import asset, MultiPartitionsDefinition, StaticPartitionsDefinition, HourlyPartitionsDefinition, \
-    AssetExecutionContext, WeeklyPartitionsDefinition, AssetIn, MultiToSingleDimensionPartitionMapping
+    AssetExecutionContext, WeeklyPartitionsDefinition, AssetIn, MultiToSingleDimensionPartitionMapping, \
+    TimeWindowPartitionMapping
 
 from water_watch.stateflow_schema import SiteFlowInformation, SiteFlowFile, NULL_DATETIME_STRING, \
     SiteFlowAverageInformation, SiteFlowAverageFile
@@ -89,7 +90,6 @@ def flow_data_7d_parsed(flow_data_7d_raw: str) -> list[SiteFlowAverageInformatio
     metadata={"partition_expr": {'date': '_runtime', 'state': '_state'}})
 def site_flow_7d_information(context: AssetExecutionContext,
                              flow_data_7d_parsed: list[SiteFlowAverageInformation]) -> pandas.DataFrame:
-
     context.log.warning("flow_data_7d_parsed: %s", flow_data_7d_parsed)
     partition: dict[str, str] = context.partition_key.keys_by_dimension
     result = pandas.DataFrame(flow_data_7d_parsed)
@@ -112,18 +112,9 @@ def site_flow_7d_information(context: AssetExecutionContext,
 @asset(
     io_manager_key=bq_io_manager_key,
     metadata={"partition_expr": {'date': '_runtime', 'state': '_state'}},
-    partitions_def=StaticPartitionsDefinition(["co"]),
-    ins={"site_flow_7d_information":
-             AssetIn(["site_flow_7d_information"],
-                     partition_mapping=MultiToSingleDimensionPartitionMapping(partition_dimension_name="state")),
-         "site_flow_information":
-             AssetIn(["site_flow_information"],
-                     partition_mapping=MultiToSingleDimensionPartitionMapping(partition_dimension_name="state"))
-         })
+    partitions_def=WeeklyStatePartititonDefenition)
 def sites(site_flow_7d_information: pandas.DataFrame, site_flow_information: pandas.DataFrame) -> pandas.DataFrame:
-    columns_to_retain = ['site_no', 'station_nm',''
-                         'dec_lat_va', 'dec_long_va',
-                         'huc_cd', 'class_']
+    columns_to_retain = ['site_no', 'station_nm', 'dec_lat_va', 'dec_long_va', 'huc_cd', 'class_']
     reduced_7d = site_flow_7d_information[columns_to_retain]
     reduced_flow = site_flow_information[columns_to_retain]
     return pandas.concat([reduced_7d, reduced_flow], ignore_index=True).drop_duplicates()
