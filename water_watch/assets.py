@@ -96,7 +96,7 @@ def site_flow_7d_information(context: AssetExecutionContext,
     result['flow'] = result['flow'].apply(lambda f: None if isinstance(f, str) else f)
     # filter out null datetimes and parse the rest
     result['flow_dt'] = result['flow_dt'].apply(
-        lambda t: None if t == NULL_DATETIME_STRING else dateutil.parser.isoparse(t).astimezone(timezone.utc))
+        lambda t: None if t == NULL_DATETIME_STRING or not t else dateutil.parser.isoparse(t).astimezone(timezone.utc))
     # parse non-null percent_*
     result['percent_median'] = result['percent_median'].apply(lambda f: float(f) if f else None)
     result['percent_mean'] = result['percent_mean'].apply(lambda f: float(f) if f else None)
