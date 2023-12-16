@@ -12,7 +12,7 @@ from water_watch.io_managers import gcs_io_manager_key, bq_io_manager_key
 
 HourlyStatePartititonDefenition = MultiPartitionsDefinition({
     "state": StaticPartitionsDefinition(["co"]),
-    "date": HourlyPartitionsDefinition(start_date="2023-12-10-07:00"),
+    "date": HourlyPartitionsDefinition(start_date="2023-12-16-07:00"),
 })
 
 WeeklyStatePartititonDefenition = MultiPartitionsDefinition({
