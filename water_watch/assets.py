@@ -30,8 +30,7 @@ def current_flow_data_raw(context: AssetExecutionContext) -> str:
     return r.text
 
 
-@asset(
-    partitions_def=HourlyStatePartititonDefenition)
+@asset(partitions_def=HourlyStatePartititonDefenition)
 def current_flow_data_parsed(current_flow_data_raw: str) -> list[SiteFlowInformation]:
     return SiteFlowFile.from_json(current_flow_data_raw).sites
 
@@ -73,8 +72,7 @@ def flow_data_7d_raw(context: AssetExecutionContext) -> str:
     return r.text
 
 
-@asset(
-    partitions_def=WeeklyStatePartititonDefenition)
+@asset(partitions_def=WeeklyStatePartititonDefenition)
 def flow_data_7d_parsed(flow_data_7d_raw: str) -> list[SiteFlowAverageInformation]:
     return SiteFlowAverageFile.from_json(flow_data_7d_raw).sites
 
@@ -84,9 +82,9 @@ def flow_data_7d_parsed(flow_data_7d_raw: str) -> list[SiteFlowAverageInformatio
     partitions_def=WeeklyStatePartititonDefenition,
     metadata={"partition_expr": {'date': '_runtime', 'state': '_state'}})
 def site_flow_7d_information(context: AssetExecutionContext,
-                             flow_data_7d_parsed: list[SiteFlowInformation]) -> pandas.DataFrame:
+                             flow_data_7d_parsed: list[SiteFlowAverageInformation]) -> pandas.DataFrame:
     partition: dict[str, str] = context.partition_key.keys_by_dimension
-    result = pandas.DataFrame(current_flow_data_parsed)
+    result = pandas.DataFrame(flow_data_7d_parsed)
     result.rename(columns={'class_': 'class'})
     # pull flow/stage status codes out into a separate column
     result['flow_status'] = result['flow'].apply(lambda f: f if isinstance(f, str) else 'Nrm')
