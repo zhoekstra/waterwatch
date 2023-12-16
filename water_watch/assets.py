@@ -10,6 +10,8 @@ from water_watch.stateflow_schema import SiteFlowInformation, SiteFlowFile, NULL
     SiteFlowAverageInformation, SiteFlowAverageFile
 from water_watch.io_managers import gcs_io_manager_key, bq_io_manager_key
 
+StatePartitionDefenition = StaticPartitionsDefinition(["co"])
+
 HourlyStatePartititonDefenition = MultiPartitionsDefinition({
     "state": StaticPartitionsDefinition(["co"]),
     "date": HourlyPartitionsDefinition(start_date="2023-12-16-07:00"),
@@ -110,6 +112,7 @@ def site_flow_7d_information(context: AssetExecutionContext,
 @asset(
     io_manager_key=bq_io_manager_key,
     metadata={"partition_expr": {'date': '_runtime', 'state': '_state'}},
+    partitions_def=StaticPartitionsDefinition(["co"]),
     ins={"site_flow_7d_information":
              AssetIn(["site_flow_7d_information"],
                      partition_mapping=MultiToSingleDimensionPartitionMapping(partition_dimension_name="state")),
@@ -118,7 +121,7 @@ def site_flow_7d_information(context: AssetExecutionContext,
                      partition_mapping=MultiToSingleDimensionPartitionMapping(partition_dimension_name="state"))
          })
 def sites(site_flow_7d_information: pandas.DataFrame, site_flow_information: pandas.DataFrame) -> pandas.DataFrame:
-    columns_to_retain = ['site_no', 'station_nm',
+    columns_to_retain = ['site_no', 'station_nm',''
                          'dec_lat_va', 'dec_long_va',
                          'huc_cd', 'class_']
     reduced_7d = site_flow_7d_information[columns_to_retain]
