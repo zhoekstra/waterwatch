@@ -87,7 +87,8 @@ def flow_data_7d_parsed(flow_data_7d_raw: str) -> list[SiteFlowAverageInformatio
     metadata={"partition_expr": {'date': '_runtime', 'state': '_state'}})
 def site_flow_7d_information(context: AssetExecutionContext,
                              flow_data_7d_parsed: list[SiteFlowAverageInformation]) -> pandas.DataFrame:
-    context.log.warning(','.join(flow_data_7d_parsed))
+
+    context.log.warning("flow_data_7d_parsed: %s", flow_data_7d_parsed)
     partition: dict[str, str] = context.partition_key.keys_by_dimension
     result = pandas.DataFrame(flow_data_7d_parsed)
     result.rename(columns={'class_': 'class'})
