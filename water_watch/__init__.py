@@ -5,11 +5,9 @@ import os
 from dagster import Definitions, load_assets_from_modules, FilesystemIOManager, AutoMaterializePolicy, \
     AutoMaterializeRule
 from dagster_gcp import GCSResource
-from dagster_gcp_pandas import BigQueryPandasIOManager
 
 from . import assets
 from .io_managers import gcs_io_manager_key, bq_io_manager_key, gcs_io_manager, bq_io_manager
-from dagster_gcp.gcs import gcs_pickle_io_manager, gcs_resource
 
 
 AUTH_FILE = "/tmp/gcp_creds.json"
