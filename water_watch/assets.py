@@ -4,7 +4,7 @@ import dateutil.parser
 import pandas
 import requests
 from dagster import asset, MultiPartitionsDefinition, StaticPartitionsDefinition, HourlyPartitionsDefinition, \
-    AssetExecutionContext, WeeklyPartitionsDefinition
+    AssetExecutionContext, WeeklyPartitionsDefinition, AssetIn
 
 from water_watch.stateflow_schema import SiteFlowInformation, SiteFlowFile, NULL_DATETIME_STRING, \
     SiteFlowAverageInformation, SiteFlowAverageFile
@@ -44,9 +44,18 @@ def current_flow_data_parsed(current_flow_data_raw: str) -> list[SiteFlowInforma
 @asset(
     io_manager_key=bq_io_manager_key,
     partitions_def=HourlyStatePartititonDefenition,
-    metadata={"partition_expr": {'date': '_runtime', 'state': '_state'}})
+    metadata={"partition_expr": {'date': '_runtime', 'state': '_state'}},
+    ins={
+        "current_flow_data_parsed": AssetIn(key="current_flow_data_parsed"),
+        "current_flow_data_parsed": AssetIn(
+            key="current_flow_data_parsed",
+            metadata={"columns": ["site_no", "flow_nday"]},
+        )
+    }
+)
 def site_flow_information(context: AssetExecutionContext,
-                          current_flow_data_parsed: list[SiteFlowInformation]) -> pandas.DataFrame:
+                          current_flow_data_parsed: list[SiteFlowInformation],
+                          site_flow_7d_information) -> pandas.DataFrame:
     partition: dict[str, str] = context.partition_key.keys_by_dimension
     result = pandas.DataFrame(current_flow_data_parsed)
     result.rename(columns={'class_': 'class'})
@@ -66,7 +75,11 @@ def site_flow_information(context: AssetExecutionContext,
     # add partition columns
     result['_state'] = partition['state']
     result['_runtime'] = dateutil.parser.isoparse(partition['date']).astimezone(timezone.utc)
-    return result
+    # join and calculate relative flow to 7day
+    joined = result.join(site_flow_7d_information, on='site_no')
+    joined['percent_flow_vs_7day'] = (joined[['flow', 'flow_nday']]
+                                      .apply(lambda row: (row.flow - row.flow_nday) / row.flow_nday))
+    return joined.drop('flow_nday')
 
 
 @asset(
